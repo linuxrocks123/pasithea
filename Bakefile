@@ -1,0 +1,2 @@
+sh -c "cd philotes; bake"
+./baker.py
