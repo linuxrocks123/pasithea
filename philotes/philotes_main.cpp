@@ -99,9 +99,10 @@ int main()
           cout << "Philotes/Java> ";
           inject_herald = STATEMENT_HERALD;
           result = yyparse();
-          if(result)
+          if(result || error_msg.size())
           {
                cout << "Syntax error.  Try again." << endl;
+               error_msg.clear();
                continue;
           }
 

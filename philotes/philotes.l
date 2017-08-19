@@ -331,7 +331,6 @@ static string process_str_literal(char terminator)
 
 int yyerror(const char* e_str)
 {
-    YY_FLUSH_BUFFER;
     error_msg.push_back(e_str);
     return 0;
 }
