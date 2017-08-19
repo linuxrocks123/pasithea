@@ -119,10 +119,10 @@ void Pasithean_Interpreter::handle_prayer()
      Hypnos_Visitor::handle_prayer();
      switch(last_expr_eval->literal_status)
      {
-     case INT_LITERAL: pi_sout << last_expr_eval->value.numeric_val;
+     case INT_LITERAL: pi_sout << last_expr_eval->value.numeric_val << endl;
           break;
      case FLOAT_LITERAL: case DOUBLE_LITERAL:
-          pi_sout << last_expr_eval->value.float_val;
+          pi_sout << last_expr_eval->value.float_val << endl;
           break;
      case STR_LITERAL:
           pi_sout << static_cast<char*>(last_expr_eval->value.ary.ptr) << endl;

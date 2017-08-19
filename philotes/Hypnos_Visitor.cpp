@@ -741,7 +741,9 @@ void Hypnos_Visitor::handle_prayer()
      }
      else if(n=="System.out.println" || n=="System.out.print")
      {
-          if(parameters["a"].type==&typetab["boolean"])
+          if(!parameters["a"].type)
+               ;
+          else if(parameters["a"].type==&typetab["boolean"])
                sout << (parameters["a"].value.numeric_val ? "true" : "false");
           else if(parameters["a"].type==&typetab["byte"])
                sout << static_cast<int8_t>(parameters["a"].value.numeric_val);

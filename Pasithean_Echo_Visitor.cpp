@@ -524,8 +524,17 @@ void Pasithean_Echo_Visitor::visit(Sentinel& cursor)
 void Pasithean_Echo_Visitor::visit(Comment& comment)
 {
      do_whitespace(comment);
-     tout << comment.text;
-     hout_style_for_length_of(comment.text,'B');
+     if(comment.text[comment.text.length()-1]=='\n')
+     {
+          tout << comment.text.substr(0,comment.text.length()-1);
+          hout_style_for_length_of(comment.text.substr(0,comment.text.length()-1),'B');
+     }
+     else
+     {
+          tout << comment.text;
+          hout_style_for_length_of(comment.text,'B');
+          current_line += count(comment.text.begin(),comment.text.end(),'\n');
+     }
 }
 
 void Pasithean_Echo_Visitor::visit(If_Statement& if_stmt)
@@ -557,13 +566,13 @@ void Pasithean_Echo_Visitor::visit(If_Statement& if_stmt)
           do_indent();
           tout << '}';
           hout << 'A';
+          tout << "\n";
+          hout << "\n";
+          current_line++;
      }
 
      if(if_stmt.else_branch.data.size())
      {
-          tout << "\n";
-          hout << "\n";
-          current_line++;
           do_indent();
           tout << "else";
           hout << "CCCC";
@@ -578,8 +587,10 @@ void Pasithean_Echo_Visitor::visit(If_Statement& if_stmt)
                current_line++;
           }
      
-          if(false /*!!!*/ && if_stmt.else_branch.data.size()==1 && !dynamic_cast<Sentinel*>(if_stmt.else_branch.data.front()))
+          /*!!!*/ //if(if_stmt.else_branch.data.size()==1 && !dynamic_cast<Sentinel*>(if_stmt.else_branch.data.front()))
+          if(if_stmt.else_branch.data.size()==1 && dynamic_cast<If_Statement*>(if_stmt.else_branch.data.front()))
           {
+               current_line = last_indented_line = if_stmt.else_branch.data.front()->line;
                scope_level++;
                if_stmt.else_branch.visit_with(*this);
                scope_level--;
@@ -596,8 +607,9 @@ void Pasithean_Echo_Visitor::visit(If_Statement& if_stmt)
                recurse_level = old_recurse;
                scope_level--; current_line++;
                do_indent();
-               tout << '}';
-               hout << 'A';
+               tout << "}\n";
+               hout << "A\n";
+               current_line++;
           }
 
           //If we were if-else-if, unhack scope level
