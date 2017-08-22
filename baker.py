@@ -2,8 +2,8 @@
 
 import os
 
-WIN32=False
-MACOSX=False
+WIN32=True
+MACOSX=True
 LINUX=True
 
 PROGRAMS = ("pasithea",)
@@ -68,4 +68,4 @@ for target in PROGRAMS:
     if WIN32:
         print target+'_win32 sh -c "/opt/mxe/usr/bin/i686-w64-mingw32.static-g++ -std=gnu++1y -static -mwindows `ls philotes/*.obj | grep -v _main.obj$` '+' '.join(map(lambda x: x+".obj",common_objects))+' '+target+'_main.obj /opt/mxe/usr/i686-w64-mingw32.static/lib/libfltk.a philotes/win32_bin/cyg*.dll -lws2_32 -lole32 -luuid -lcomctl32 -o '+target+'_win32"'
     if MACOSX:
-        print target+'_mac sh -c "source ./mac.source; o64-g++ /opt/osxcross/target/macports/pkgs/opt/local/lib/*.dylib -std=gnu++1y `ls philotes/*.macho | grep -v _main.macho$` '+' '.join(map(lambda x: x+".macho",common_objects))+' '+target+'_main.macho -o '+target+'_mac"'
+        print target+'_mac sh -c "source ./mac.source; o64-g++ -std=gnu++1y `ls philotes/*.macho | grep -v _main.macho$` '+' '.join(map(lambda x: x+".macho",common_objects))+' '+target+'_main.macho -o '+target+'_mac -L/opt/osxcross/target/macports/pkgs/opt/local/lib -Wl,-headerpad_max_install_names /opt/osxcross/target/macports/pkgs/opt/local/lib/libfltk.a -lpthread -framework Cocoa"'
