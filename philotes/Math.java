@@ -828,7 +828,7 @@ public class Math
 
        double x;
        double fx, dx = b-a;
-       double tolerance = 1e-9;
+       double tolerance = 1e-6;
        do
        {
             dx/=2;
