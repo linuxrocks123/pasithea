@@ -658,7 +658,7 @@ void Hypnos_Visitor::handle_prayer()
      }
      else if(n=="^" || n=="^=")
      {
-          rvalue_exp->literal_status = using_float ? DOUBLE_LITERAL : INT_LITERAL;
+          rvalue_exp->literal_status = parameters["a"].type==&typetab["boolean"] ? BOOLEAN_LITERAL : INT_LITERAL;
           assert(!using_float);
           rvalue_exp->value.numeric_val = a_val_int ^ b_val_int;
 
