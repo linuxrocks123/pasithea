@@ -743,6 +743,32 @@ public class Math
        return pow(x,1.0/3.0);
   }
 
+  private static double scale(double x, int n)
+  {
+    if (x == 0 || x == Double.NEGATIVE_INFINITY
+        || ! (x < Double.POSITIVE_INFINITY) || n == 0)
+      return x;
+    long bits = Double.doubleToLongBits(x);
+    int exponent = (int) (bits >> 52) & 0x7ff;
+    if (exponent == 0) // Subnormal x.
+      {
+        x *= TWO_54;
+        exponent = ((int) (Double.doubleToLongBits(x) >> 52) & 0x7ff) - 54;
+      }
+    exponent += n;
+    if (exponent > 0x7fe) // Overflow.
+      return Double.POSITIVE_INFINITY * x;
+    if (exponent > 0) // Normal.
+      return Double.longBitsToDouble((bits & -9218868437227405313L)
+                                     | ((long) exponent << 52));
+    if (exponent <= -54)
+      return 0 * x; // Underflow.
+    exponent += 54; // Subnormal result.
+    x = Double.longBitsToDouble((bits & -9218868437227405313L)
+                                | ((long) exponent << 52));
+    return x * (1 / TWO_54);
+  }
+
   /**
    * Take <em>e</em><sup>a</sup>.  The opposite of <code>log()</code>. If the
    * argument is NaN, the result is NaN; if the argument is positive infinity,
@@ -763,14 +789,45 @@ public class Math
     if (x < EXP_LIMIT_L)
       return 0;
 
-    double sum  = 0.0;
-    double term = 1.0;
-    for (int i = 1; sum != sum + term; i++) {
-         sum  = sum + term;
-         term = term * x / i;
-    }
+        // Argument reduction.
+    double hi;
+    double lo;
+    int k;
+    double t = abs(x);
+    if (t > 0.5 * LN2)
+      {
+        if (t < 1.5 * LN2)
+          {
+            hi = t - LN2_H;
+            lo = LN2_L;
+            k = 1;
+          }
+        else
+          {
+            k = (int) (INV_LN2 * t + 0.5);
+            hi = t - k * LN2_H;
+            lo = k * LN2_L;
+          }
+        if (x < 0)
+          {
+            hi = -hi;
+            lo = -lo;
+            k = -k;
+          }
+        x = hi - lo;
+      }
+    else if (t < 1 / TWO_28)
+      return 1;
+    else
+      lo = hi = k = 0;
 
-    return sum;
+    // Now x is in primary range.
+    t = x * x;
+    double c = x - t * (P1 + t * (P2 + t * (P3 + t * (P4 + t * P5))));
+    if (k == 0)
+      return 1 - (x * c / (c - 2) - x);
+    double y = 1 - (lo - x * c / (2 - c) - hi);
+    return scale(y, k);
   }
 
   /**
@@ -807,44 +864,58 @@ public class Math
    * @return the natural log of <code>a</code>
    * @see #exp(double)
    */
-  public static double log(double y)
+  public static double log(double x)
   {
-       if (y == 0)
-            return Double.NEGATIVE_INFINITY;
-       if (y < 0)
-            return Double.NaN;
-       if (! (y < Double.POSITIVE_INFINITY))
-            return y;
+    if (x == 0)
+      return Double.NEGATIVE_INFINITY;
+    if (x < 0)
+      return Double.NaN;
+    if (! (x < Double.POSITIVE_INFINITY))
+      return x;
 
-       if(y < 8.8733e-9)
-            return Double.NEGATIVE_INFINITY;
-       if(y > 1.11e307)
-            return Double.POSITIVE_INFINITY;
-
-       double a = -19, b = 707;
-       double fa = exp(a)-y; double fb = exp(b)-y;
-       if(fa < 0 && fb < 0 || fa > 0 && fb > 0)
-            return Double.NaN;
-
-       double x;
-       double fx, dx = b-a;
-       double tolerance = 1e-6;
-       do
-       {
-            dx/=2;
-            x = a + dx;
-            fx = exp(x)-y;
-            if(fa < 0 && fx < 0 || fa > 0 && fx > 0)
-            {
-                 a = x; fa = fx;
-            }
-            else
-            {
-                 b = x; fb = fx;
-            }
-       } while(!(fx > 0 && fx <= tolerance || fx <= 0 && fx >= tolerance));
-
-       return x;
+    // Normalize x.
+    long bits = Double.doubleToLongBits(x);
+    int exponent = (int) (bits >> 52);
+    if (exponent == 0) // Subnormal x.
+      {
+        x *= TWO_54;
+        bits = Double.doubleToLongBits(x);
+        exponent = (int) (bits >> 52) - 54;
+      }
+    exponent -= 1023; // Unbias exponent.
+    bits = (bits & 0x000fffffffffffffL) | 0x3ff0000000000000L;
+    x = Double.longBitsToDouble(bits);
+    if (x >= SQRT_2)
+      {
+        x *= 0.5;
+        exponent++;
+      }
+    x--;
+    if (abs(x) < 1 / TWO_20)
+      {
+        if (x == 0)
+          return exponent * LN2_H + exponent * LN2_L;
+        double r = x * x * (0.5 - 1 / 3.0 * x);
+        if (exponent == 0)
+          return x - r;
+        return exponent * LN2_H - ((r - exponent * LN2_L) - x);
+      }
+    double s = x / (2 + x);
+    double z = s * s;
+    double w = z * z;
+    double t1 = w * (LG2 + w * (LG4 + w * LG6));
+    double t2 = z * (LG1 + w * (LG3 + w * (LG5 + w * LG7)));
+    double r = t2 + t1;
+    if (bits >= 0x3ff6174a00000000L && bits < 0x3ff6b85200000000L)
+      {
+        double h = 0.5 * x * x; // Need more accuracy for x near sqrt(2).
+        if (exponent == 0)
+          return x - (h - s * (h + r));
+        return exponent * LN2_H - ((h - (s * (h + r) + exponent * LN2_L)) - x);
+      }
+    if (exponent == 0)
+      return x - s * (x - r);
+    return exponent * LN2_H - ((s * (x - r) - exponent * LN2_L) - x);
   }
 
   /**
@@ -1141,18 +1212,18 @@ public class Math
    * negative powers of two here.
    */
   private static final double
-    TWO_16 = 0x10000,
-    TWO_20 = 0x100000,
-    TWO_24 = 0x1000000,
-    TWO_27 = 0x8000000,
-    TWO_28 = 0x10000000,
-    TWO_29 = 0x20000000,
-    TWO_31 = 0x80000000,
-    TWO_49 = 0x2000000000000,
-    TWO_52 = 0x10000000000000,
-    TWO_54 = 0x40000000000000,
-    TWO_57 = 0x200000000000000,
-    TWO_60 = 0x1000000000000000,
+  TWO_16 = (double)0x10000,
+       TWO_20 = (double)0x100000,
+       TWO_24 = (double)0x1000000,
+       TWO_27 = (double)0x8000000,
+       TWO_28 = (double)0x10000000,
+       TWO_29 = (double)0x20000000,
+       TWO_31 = (double)0x80000000L,
+       TWO_49 = (double)0x2000000000000L,
+       TWO_52 = (double)0x10000000000000L,
+       TWO_54 = (double)0x40000000000000L,
+       TWO_57 = (double)0x200000000000000L,
+       TWO_60 = (double)0x1000000000000000L,
     TWO_64 = 1.8446744073709552e19,
     TWO_66 = 7.378697629483821e19,
     TWO_1023 = 8.98846567431158e307;

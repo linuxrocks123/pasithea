@@ -406,16 +406,16 @@ void Hypnos_Visitor::visit(Anonymous_Block& anon_blk)
 
 void Hypnos_Visitor::visit(Interruptor& interrupt)
 {
-     interrupt_level = interrupt.level;
      if(interrupt.returned_expression)
           interrupt.returned_expression->visit_with(*this);
+     interrupt_level = interrupt.level;
 }
 
 void Hypnos_Visitor::handle_prayer()
 {
      Function_Call* called_func = call_stack.top();
      string n = called_func->called_func_name;
-     if(n!="System.out.println" && n!="System.out.print")
+     if(n!="System.out.println" && n!="System.out.print" && n!="Double.doubleToLongBits" && n!="Double.longBitsToDouble")
           n = n.substr(n.find(".")+1);
      map<string,Symbol>& parameters = symtab.back();
      map<string,Symbol>& caller_symtab = *++symtab.rbegin();
@@ -428,6 +428,10 @@ void Hypnos_Visitor::handle_prayer()
      bool a_float = parameters["a"].type==&typetab["float"] || parameters["a"].type==&typetab["double"];
      bool b_float = parameters.count("b") ? parameters["b"].type==&typetab["float"] || parameters["b"].type==&typetab["double"] : false;
      bool using_float = a_float || b_float;
+
+     bool a_long = parameters["a"].type==&typetab["long"];
+     bool b_long = parameters.count("b") ? parameters["b"].type==&typetab["long"] : false;
+     bool using_long = a_long || b_long;
      
      int64_t a_val_int;
      int64_t b_val_int;
@@ -589,7 +593,7 @@ void Hypnos_Visitor::handle_prayer()
      }
      else if(n=="+" || n=="+=")
      {
-          rvalue_exp->literal_status = using_float ? DOUBLE_LITERAL : INT_LITERAL;
+          rvalue_exp->literal_status = using_float ? DOUBLE_LITERAL : using_long ? LONG_LITERAL : INT_LITERAL;
           if(using_float)
                rvalue_exp->value.float_val = a_val_float + b_val_float;
           else
@@ -600,7 +604,7 @@ void Hypnos_Visitor::handle_prayer()
      }
      else if(n=="-" || n=="-=")
      {
-          rvalue_exp->literal_status = using_float ? DOUBLE_LITERAL : INT_LITERAL;
+          rvalue_exp->literal_status = using_float ? DOUBLE_LITERAL : using_long ? LONG_LITERAL : INT_LITERAL;
           if(using_float)
                rvalue_exp->value.float_val = a_val_float - b_val_float;
           else
@@ -611,7 +615,7 @@ void Hypnos_Visitor::handle_prayer()
      }
      else if(n=="<<" || n=="<<=")
      {
-          rvalue_exp->literal_status = using_float ? DOUBLE_LITERAL : INT_LITERAL;
+          rvalue_exp->literal_status = using_float ? DOUBLE_LITERAL : using_long ? LONG_LITERAL : INT_LITERAL;
           assert(!using_float);
           rvalue_exp->value.numeric_val = a_val_int << b_val_int;
 
@@ -620,7 +624,7 @@ void Hypnos_Visitor::handle_prayer()
      }
      else if(n==">>" || n==">>=")
      {
-          rvalue_exp->literal_status = using_float ? DOUBLE_LITERAL : INT_LITERAL;
+          rvalue_exp->literal_status = using_float ? DOUBLE_LITERAL : using_long ? LONG_LITERAL : INT_LITERAL;
           assert(!using_float);
           rvalue_exp->value.numeric_val = a_val_int >> b_val_int;
 
@@ -629,7 +633,7 @@ void Hypnos_Visitor::handle_prayer()
      }
      else if(n==">>>" || n==">>>=")
      {
-          rvalue_exp->literal_status = using_float ? DOUBLE_LITERAL : INT_LITERAL;
+          rvalue_exp->literal_status = using_float ? DOUBLE_LITERAL : using_long ? LONG_LITERAL : INT_LITERAL;
           assert(!using_float);
           uint64_t raw = a_val_int;
           raw>>=b_val_int;
@@ -640,7 +644,7 @@ void Hypnos_Visitor::handle_prayer()
      }
      else if(n=="&" || n=="&=")
      {
-          rvalue_exp->literal_status = using_float ? DOUBLE_LITERAL : INT_LITERAL;
+          rvalue_exp->literal_status = using_float ? DOUBLE_LITERAL : using_long ? LONG_LITERAL : INT_LITERAL;
           assert(!using_float);
           rvalue_exp->value.numeric_val = a_val_int & b_val_int;
 
@@ -649,7 +653,7 @@ void Hypnos_Visitor::handle_prayer()
      }
      else if(n=="|" || n=="|=")
      {
-          rvalue_exp->literal_status = using_float ? DOUBLE_LITERAL : INT_LITERAL;
+          rvalue_exp->literal_status = using_float ? DOUBLE_LITERAL : using_long ? LONG_LITERAL : INT_LITERAL;
           assert(!using_float);
           rvalue_exp->value.numeric_val = a_val_int | b_val_int;
 
@@ -667,7 +671,7 @@ void Hypnos_Visitor::handle_prayer()
      }
      else if(n=="-_")
      {
-          rvalue_exp->literal_status = a_float ? DOUBLE_LITERAL : INT_LITERAL;
+          rvalue_exp->literal_status = a_float ? DOUBLE_LITERAL : using_long ? LONG_LITERAL : INT_LITERAL;
           if(a_float)
                rvalue_exp->value.float_val = -a_val_float;
           else
@@ -705,7 +709,7 @@ void Hypnos_Visitor::handle_prayer()
      }
      else if(n=="*" || n=="*=")
      {
-          rvalue_exp->literal_status = using_float ? DOUBLE_LITERAL : INT_LITERAL;
+          rvalue_exp->literal_status = using_float ? DOUBLE_LITERAL : using_long ? LONG_LITERAL : INT_LITERAL;
           if(using_float)
                rvalue_exp->value.float_val = a_val_float * b_val_float;
           else
@@ -716,7 +720,7 @@ void Hypnos_Visitor::handle_prayer()
      }
      else if(n=="/" || n=="/=")
      {
-          rvalue_exp->literal_status = using_float ? DOUBLE_LITERAL : INT_LITERAL;
+          rvalue_exp->literal_status = using_float ? DOUBLE_LITERAL : using_long ? LONG_LITERAL : INT_LITERAL;
           if(using_float)
                rvalue_exp->value.float_val = a_val_float / b_val_float;
           else
@@ -727,7 +731,7 @@ void Hypnos_Visitor::handle_prayer()
      }
      else if(n=="%" || n=="%=")
      {
-          rvalue_exp->literal_status = using_float ? DOUBLE_LITERAL : INT_LITERAL;
+          rvalue_exp->literal_status = using_float ? DOUBLE_LITERAL : using_long ? LONG_LITERAL : INT_LITERAL;
           if(using_float)
           {
                yyerror("Float % not implemented");
@@ -766,6 +770,16 @@ void Hypnos_Visitor::handle_prayer()
           }
           if(n=="System.out.println")
                sout << endl;
+     }
+     else if(n=="Double.longBitsToDouble")
+     {
+          rvalue_exp->literal_status = DOUBLE_LITERAL;
+          rvalue_exp->value.numeric_val = a_val_int;
+     }
+     else if(n=="Double.doubleToLongBits")
+     {
+          rvalue_exp->literal_status = LONG_LITERAL;
+          rvalue_exp->value.float_val = a_val_float;
      }
      else if(n=="Scanner")
      {
@@ -876,7 +890,7 @@ Symbol Hypnos_Visitor::rvalue_sym(const Atomic_Expression& exp, Type* min_type)
           break;
      case INT_LITERAL: case INT: value_type = &typetab["int"];
           break;
-     case LONG: value_type = &typetab["long"];
+     case LONG_LITERAL: case LONG: value_type = &typetab["long"];
           break;
      case FLOAT_LITERAL: case FLOAT: value_type = &typetab["float"];
           break;

@@ -2,8 +2,8 @@
 
 import os
 
-WIN32=False
-MACOSX=False
+WIN32=True
+MACOSX=True
 LINUX=True
 
 PROGRAMS = ("philotes","hypnos",)#"pasithea")
@@ -52,7 +52,7 @@ for fname in flist:
             if LINUX:
                 print base_name+".tab.o / "+target
             if WIN32:
-                print base_name+".tab.obj / "+target+"_win32"
+                print base_name+".tab.obj / "+target+"_win32.exe"
             if MACOSX:
                 print base_name+".tab.macho / "+target+"_mac"
     elif has_suffix(fname,".l"):
@@ -77,7 +77,7 @@ for fname in flist:
             if LINUX:
                 print "lex.yy.o / "+target
             if WIN32:
-                print "lex.yy.obj / "+target+"_win32"
+                print "lex.yy.obj / "+target+"_win32.exe"
             if MACOSX:
                 print "lex.yy.macho / "+target+"_mac"
     elif has_suffix(fname,".cpp"):
@@ -101,14 +101,14 @@ for fname in flist:
                 if LINUX:
                     print base_name+".o / "+target
                 if WIN32:
-                    print base_name+".obj / "+target+"_win32"
+                    print base_name+".obj / "+target+"_win32.exe"
                 if MACOSX:
                     print base_name+".macho / "+target+"_mac"
         else:
             if LINUX:
                 print base_name+".o / "+fname[:fname.index("_")]
             if WIN32:
-                print base_name+".obj / "+fname[:fname.index("_")]+"_win32"
+                print base_name+".obj / "+fname[:fname.index("_")]+"_win32.exe"
             if MACOSX:
                 print base_name+".macho / "+fname[:fname.index("_")]+"_mac"
     elif has_suffix(fname,".hpp") or has_suffix(fname,".h"):
@@ -123,6 +123,6 @@ for target in PROGRAMS:
     if LINUX:
         print target+' sh -c "g++ -std=gnu++1y '+' '.join(map(lambda x: x+".o",common_objects))+' '+target+'_main.o -o '+target+'"'
     if WIN32:
-        print target+'_win32 sh -c "/opt/mxe/usr/bin/i686-w64-mingw32.static-g++ -std=gnu++1y -static '+' '.join(map(lambda x: x+".obj",common_objects))+' '+target+'_main.obj /opt/mxe/usr/i686-w64-mingw32.static/lib/libfltk.a win32_bin/cyg*.dll -lws2_32 -lole32 -luuid -lcomctl32 -o '+target+'_win32"'
+        print target+'_win32.exe sh -c "/opt/mxe/usr/bin/i686-w64-mingw32.static-g++ -std=gnu++1y -static '+' '.join(map(lambda x: x+".obj",common_objects))+' '+target+'_main.obj /opt/mxe/usr/i686-w64-mingw32.static/lib/libfltk.a win32_bin/cyg*.dll -lws2_32 -lole32 -luuid -lcomctl32 -o '+target+'_win32.exe"'
     if MACOSX:
         print target+'_mac sh -c "source ./mac.source; o64-g++ -std=gnu++1y '+' '.join(map(lambda x: x+".macho",common_objects))+' '+target+'_main.macho -o '+target+'_mac"'

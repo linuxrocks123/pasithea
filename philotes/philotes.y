@@ -77,7 +77,7 @@ string get_unique_anonymous_placeholder_str();
 %precedence <token> ELSE
 %left <token> SCOPE
 
-%precedence <token> STR_LITERAL BOOLEAN_LITERAL CHAR_LITERAL INT_LITERAL FLOAT_LITERAL DOUBLE_LITERAL IDENTIFIER
+%precedence <token> STR_LITERAL BOOLEAN_LITERAL CHAR_LITERAL INT_LITERAL LONG_LITERAL FLOAT_LITERAL DOUBLE_LITERAL IDENTIFIER
 
 %token <token> IMPORT
 %token <token> INCLUDE
@@ -1060,6 +1060,7 @@ Literal: STR_LITERAL { $$ = handle_literal(STR_LITERAL,$1); }
         |       BOOLEAN_LITERAL { $$ = handle_literal(BOOLEAN_LITERAL,$1); }
         |       CHAR_LITERAL { $$ = handle_literal(CHAR_LITERAL,$1); }
         |       INT_LITERAL { $$ = handle_literal(INT_LITERAL,$1); }
+        |       LONG_LITERAL { $$ = handle_literal(LONG_LITERAL,$1); }
         |       FLOAT_LITERAL { $$ = handle_literal(FLOAT_LITERAL,$1); }
         |       DOUBLE_LITERAL { $$ = handle_literal(DOUBLE_LITERAL,$1); };
 

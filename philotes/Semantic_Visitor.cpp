@@ -239,6 +239,8 @@ void Semantic_Visitor::visit(Atomic_Expression& atomic_expr)
           return;
      case INT_LITERAL: last_expr_eval = atomic_expr.static_type = &typetab["int"];
           return;
+     case LONG_LITERAL: last_expr_eval = atomic_expr.static_type = &typetab["long"];
+          return;
      case FLOAT_LITERAL: last_expr_eval = atomic_expr.static_type = &typetab["float"];
           return;
      case DOUBLE_LITERAL: last_expr_eval = atomic_expr.static_type = &typetab["double"];

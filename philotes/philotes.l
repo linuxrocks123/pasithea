@@ -21,7 +21,7 @@ letter   [A-Za-z_]
 digit    [0-9]
 hexdigit [0-9A-Fa-f]
 id       {letter}({letter}|{digit})*
-integer  ((0b|0)?{digit}+)|(0x{hexdigit}+)
+integer  (((0b|0)?{digit}+)|(0x{hexdigit}+))[Ll]?
 fpoint   ({integer}\.{integer}*(e(-|\+)?{integer}+)?|{integer}+e(-|\+)?{integer}+|\.{integer}+e(-|\+)?{integer}+)
 
 %%
@@ -240,7 +240,7 @@ false    { mkyylv(); yylval.token->value.numeric_val = 0; return BOOLEAN_LITERAL
      yylval.token->value.numeric_val = retval[0];
      return CHAR_LITERAL; }
 
-{integer} { mkyylv(); yylval.token->value.numeric_val = strtol(yytext,NULL,0); return INT_LITERAL; }
+{integer} { mkyylv(); yylval.token->value.numeric_val = strtol(yytext,NULL,0); return yytext[yyleng-1]!='L' && yytext[yyleng-1]!='l' ? INT_LITERAL : LONG_LITERAL; }
 {fpoint}f? { mkyylv(); yylval.token->value.float_val = atof(yytext); return yytext[yyleng-1]=='f' || yytext[yyleng-1]=='F' ? FLOAT_LITERAL : DOUBLE_LITERAL; }
 
  /*Identifier rule*/

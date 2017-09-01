@@ -94,6 +94,16 @@ public class Double
    */
   private final double value;
 
+  public static double longBitsToDouble(long a)
+  {
+    #prayer
+  }
+
+  public static long doubleToLongBits(double a)
+  {
+    #prayer
+  }
+
   /**
    * Create a <code>Double</code> from the primitive <code>double</code>
    * specified.
