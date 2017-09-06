@@ -123,6 +123,8 @@ static bool mb_callback(FLTK_Callback_Editor& ed, int key)
 
      remaining_sources.push("#System.java");
      remaining_sources.push("#Double.java");
+     remaining_sources.push("#Random.java");
+     remaining_sources.push("#Math.java");
      Import_Visitor importer;
      importer.visit(*static_cast<Decl_List*>(root));
 

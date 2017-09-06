@@ -391,6 +391,18 @@ void Pasithean_Echo_Visitor::visit(Parenthetical& parenthetical)
      hout << "A";
 }
 
+static string format_float_literal(double value)
+{
+     string x = to_string(value);
+     int pos = x.find_last_not_of("0");
+     if(pos==string::npos)
+          return x;
+     if(x[pos]=='.')
+          pos++;
+     return x.substr(0,pos+1);
+}
+     
+
 void Pasithean_Echo_Visitor::visit(Atomic_Expression& atomic_expr)
 {
      const static unordered_map<char,char> escape_map = {{'\n','n'},{'\'','\''},{'\t','t'},{'\0','0'}};
@@ -442,12 +454,12 @@ void Pasithean_Echo_Visitor::visit(Atomic_Expression& atomic_expr)
      case INT_LITERAL: tout << atomic_expr.value.numeric_val;
           hout_style_for_length_of(to_string(atomic_expr.value.numeric_val),'I');
           break;
-     case FLOAT_LITERAL: tout << to_string(atomic_expr.value.float_val) << 'f';
-          hout_style_for_length_of(to_string(atomic_expr.value.float_val),'I');
+     case FLOAT_LITERAL: tout << format_float_literal(atomic_expr.value.float_val) << 'f';
+          hout_style_for_length_of(format_float_literal(atomic_expr.value.float_val),'I');
           hout << 'I';
           break;
-     case DOUBLE_LITERAL: tout << to_string(atomic_expr.value.float_val);
-          hout_style_for_length_of(to_string(atomic_expr.value.float_val),'I');
+     case DOUBLE_LITERAL: tout << format_float_literal(atomic_expr.value.float_val);
+          hout_style_for_length_of(format_float_literal(atomic_expr.value.float_val),'I');
           break;
      }
 }
