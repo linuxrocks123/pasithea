@@ -294,9 +294,10 @@ void Hypnos_Visitor::visit(Var_Decl_Statement& vdecl_stmt)
      {
           vdecl_stmt.init_expr->visit_with(*this);
           if(last_expr_eval->literal_status || to_insert.type->name!="Object" && to_insert.type->base_or_parent_types.empty()) //TODO: handle C++ value-based objects
-               to_insert = rvalue_sym(*last_expr_eval);
+               to_insert = rvalue_sym(*last_expr_eval,to_insert.type);
           else
                to_insert = *lvalue_of(*last_expr_eval);
+          to_insert.type = vdecl_stmt.modifiers.static_type;
      }
      else if(to_insert.type==&typetab["String"])
           to_insert.value.ary.ptr = calloc(1,1);
@@ -750,7 +751,7 @@ void Hypnos_Visitor::handle_prayer()
           else if(parameters["a"].type==&typetab["boolean"])
                sout << (parameters["a"].value.numeric_val ? "true" : "false");
           else if(parameters["a"].type==&typetab["byte"])
-               sout << static_cast<int8_t>(parameters["a"].value.numeric_val);
+               sout << static_cast<int>(static_cast<int8_t>(parameters["a"].value.numeric_val));
           else if(parameters["a"].type==&typetab["short"])
                sout << static_cast<int16_t>(parameters["a"].value.numeric_val);
           else if(parameters["a"].type==&typetab["char"])
@@ -908,10 +909,9 @@ Symbol Hypnos_Visitor::rvalue_sym(const Atomic_Expression& exp, Type* min_type)
      else
           to_return = *static_cast<Symbol*>(exp.value.ary.ptr);
      if(min_type && to_return.type->name!="float" && to_return.type->name!="double" && (min_type->name=="float" || min_type->name=="double"))
-     {
-          to_return.type = min_type;
           to_return.value.float_val = to_return.value.numeric_val;
-     }
+     if(min_type)
+          to_return.type = min_type;
      return to_return;
 }
 
