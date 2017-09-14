@@ -8,6 +8,7 @@
 
 #include "StringFunctions.h"
 
+#include <cmath>
 #include <cstring>
 #include <iostream>
 #include <fstream>
@@ -16,6 +17,7 @@
 
 #include <sys/time.h>
 
+using std::fmod;
 using std::istream;
 using std::ifstream;
 using std::endl;
@@ -585,6 +587,8 @@ void Hypnos_Visitor::handle_prayer()
                to_append = (char)(parameters["b"].value.numeric_val);
           else if(parameters["b"].type==&typetab["byte"] || parameters["b"].type==&typetab["short"] || parameters["b"].type==&typetab["int"] || parameters["b"].type==&typetab["long"])
                to_append = to_string(parameters["b"].value.numeric_val);
+          else if(parameters["b"].type==&typetab["boolean"])
+               to_append = parameters["b"].value.numeric_val ? "true" : "false";
           else
                assert(false); //call toString method on Object; not implemented
           rvalue_exp->value.ary.ptr = strdup((parameters["a"].value.as_string()+to_append).c_str());
@@ -734,10 +738,7 @@ void Hypnos_Visitor::handle_prayer()
      {
           rvalue_exp->literal_status = using_float ? DOUBLE_LITERAL : using_long ? LONG_LITERAL : INT_LITERAL;
           if(using_float)
-          {
-               yyerror("Float % not implemented");
-               throw "Runtime error";
-          }
+               rvalue_exp->value.float_val = fmod(a_val_float,b_val_float);
           else
                rvalue_exp->value.numeric_val = a_val_int % b_val_int;
 
