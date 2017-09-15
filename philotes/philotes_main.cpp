@@ -26,7 +26,7 @@ static void print_last_expr_eval()
      if(lee.type==&typetab["boolean"])
           cout << (lee.value.numeric_val ? "true" : "false");
      else if(lee.type==&typetab["byte"])
-          cout << static_cast<int8_t>(lee.value.numeric_val);
+          cout << static_cast<int>(static_cast<int8_t>(lee.value.numeric_val));
      else if(lee.type==&typetab["short"])
           cout << static_cast<int16_t>(lee.value.numeric_val);
      else if(lee.type==&typetab["char"])
