@@ -26,7 +26,8 @@ void Import_Visitor::visit(Func_Decl& func_decl)
 
 void Import_Visitor::visit(Import_Decl& import_decl)
 {
-     static map<string,set<string> > valid_imports = {{"java.util.Scanner",{"#Scanner.java"}},{"java.io.*",{"#File.java"}},{"java.util.*",{"#Random.java","#Scanner.java"}},{"java.util.Random",{"#Random.java"}}};
+     //static map<string,set<string> > valid_imports = {{"java.util.Scanner",{"#Scanner.java"}},{"java.io.*",{"#File.java"}},{"java.util.*",{"#Random.java","#Scanner.java"}},{"java.util.Random",{"#Random.java"}}};
+     static map<string,set<string> > valid_imports = {{"java.util.Scanner",{"#Scanner.java"}},{"java.io.*",{"#File.java"}},{"java.util.*",{"#Scanner.java"}},{"java.util.Random",{}}};
      if(valid_imports.count(import_decl.imported_class))
           for(const auto& x : valid_imports[import_decl.imported_class])
                remaining_sources.push(x);
