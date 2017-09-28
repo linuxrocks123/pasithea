@@ -847,15 +847,18 @@ void Hypnos_Visitor::handle_prayer()
           rvalue_exp->literal_status = CHAR_LITERAL;
           rvalue_exp->value.numeric_val = reinterpret_cast<char*>(tthis)[a_val_int];
      }
-     else if(n=="equals" || n=="compareTo")
+     else if(n=="equals" || n=="equalsIgnoreCase" || n=="compareTo")
      {
+          //Function pointer for strcmp or strncmp
+          int (*cmp_func)(const char* a, const char* b) = n=="equalsIgnoreCase" ? strcasecmp : strcmp;
+          
           if(!tthis)
                throw "Runtime error: null String";
           if(!parameters["a"].value.ary.ptr)
                throw "Runtime error: null Parameter";
           rvalue_exp->literal_status = n=="equals" ? BOOLEAN_LITERAL : INT_LITERAL;
-          rvalue_exp->value.numeric_val = strcmp(reinterpret_cast<char*>(tthis),reinterpret_cast<char*>(parameters["a"].value.ary.ptr));
-          if(n=="equals")
+          rvalue_exp->value.numeric_val = cmp_func(reinterpret_cast<char*>(tthis),reinterpret_cast<char*>(parameters["a"].value.ary.ptr));
+          if(n=="equals" || n=="equalsIgnoreCase")
                rvalue_exp->value.numeric_val = !rvalue_exp->value.numeric_val;
      }
      else
